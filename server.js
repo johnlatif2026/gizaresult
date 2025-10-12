@@ -558,4 +558,6 @@ app.delete('/api/requests/:id', authenticateAdmin, async (req, res) => {
 
 // ==============================================
 const port = process.env.PORT || 3000;
-module.exports = app;
+app.listen(port, () => {
+  console.log(`✅ Server running on port ${port}`);
+});
