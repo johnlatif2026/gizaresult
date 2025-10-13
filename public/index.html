@@ -1346,7 +1346,7 @@ document.getElementById('chatOptions').addEventListener('click', async (e) => {
           
           try {
             // إرسال الاستفسار مع بيانات المستخدم إلى السيرفر
-            const res = await fetch('/api/send-admin-message', {
+            const res = await fetch('/api/chat-inquiries', {
               method: 'POST',
               headers: {'Content-Type':'application/json'},
               body: JSON.stringify({ 
