@@ -478,6 +478,57 @@ ${message}
   }
 });
 
+// ✅ API لاستقبال استفسارات الدردشة من المستخدمين
+app.post('/api/chat-inquiries', async (req, res) => {
+  try {
+    const { message, userData } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'الرسالة مطلوبة' 
+      });
+    }
+
+    const newInquiry = {
+      message: message,
+      userData: userData || {},
+      created_at: new Date().toISOString(),
+      status: 'new'
+    };
+
+    // حفظ الاستفسار في Firestore
+    const docRef = await db.collection('chat_inquiries').add(newInquiry);
+
+    // إرسال إشعار للادمن عبر التليجرام
+    const telegramMessage = `
+<b>💬 استفسار جديد من الدردشة:</b>
+👤 <b>الاسم:</b> ${userData.name || "غير معروف"}
+📞 <b>الهاتف:</b> ${userData.phone || "غير معروف"}
+📧 <b>البريد:</b> ${userData.email || "غير معروف"}
+
+💭 <b>الرسالة:</b>
+${message}
+
+🆔 <b>رقم الاستفسار:</b> ${docRef.id}
+    `;
+    
+    await sendTelegramNotification(telegramMessage);
+
+    res.json({ 
+      success: true, 
+      id: docRef.id,
+      message: 'تم إرسال استفسارك بنجاح' 
+    });
+
+  } catch (error) {
+    console.error('Error in /api/chat-inquiries:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'حدث خطأ أثناء إرسال الاستفسار' 
+    });
+  }
+});
 // ========== APIs إدارية (محميّة بـ JWT) ==========
 app.get('/api/chat-inquiries', authenticateAdmin, async (req, res) => {
   try {
