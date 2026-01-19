@@ -424,7 +424,6 @@
       <p class="text-purple-800 font-bold">"ستظهر النتيجة على الصفحة الإلكترونية وسيتم أيضًا إرسالها إلى البريد الإلكتروني خلال دقيقتين تقريبًا."</p>
     </div>
   </div>
-
   <!-- أزرار حجز النتيجة -->
   <div class="card p-6 mb-6">
     <h2 class="text-2xl font-semibold mb-4 text-gray-800 text-center">
@@ -869,7 +868,6 @@ function displayResult(result) {
     { key: 'seatNumber', label: 'رقم الجلوس' },
     { key: 'stage', label: 'المرحلة' },
     { key: 'gradeLevel', label: 'الصف' },
-    { key: 'division', label: 'الشعبة' },
     { key: 'schoolName', label: 'المدرسة' },
     { key: 'notes', label: 'ملاحظات' }
   ];
@@ -1023,7 +1021,6 @@ function printResult() {
           <div><strong>اسم الطالب:</strong> ${currentResult.name || 'غير متوفر'}</div>
           <div><strong>رقم الجلوس:</strong> ${currentResult.seatNumber || 'غير متوفر'}</div>
           <div><strong>المرحلة:</strong> ${currentResult.stage || 'غير متوفر'}</div>
-          <div><strong>الشعبة:</strong> ${currentResult.division || 'غير متوفر'}</div>
           <div><strong>الصف:</strong> ${currentResult.gradeLevel || 'غير متوفر'}</div>
           <div><strong>المدرسة:</strong> ${currentResult.schoolName || 'غير متوفر'}</div>
           <div><strong>ملاحظات:</strong> ${currentResult.notes || 'لا توجد'}</div>
@@ -1128,7 +1125,6 @@ async function saveAsPDF() {
           <div><strong>اسم الطالب:</strong> ${currentResult.name || 'غير متوفر'}</div>
           <div><strong>رقم الجلوس:</strong> ${currentResult.seatNumber || 'غير متوفر'}</div>
           <div><strong>المرحلة:</strong> ${currentResult.stage || 'غير متوفر'}</div>
-          <div><strong>الشعبة:</strong> ${currentResult.division || 'غير متوفر'}</div>
           <div><strong>الصف:</strong> ${currentResult.gradeLevel || 'غير متوفر'}</div>
           <div><strong>المدرسة:</strong> ${currentResult.schoolName || 'غير متوفر'}</div>
           <div><strong>ملاحظات:</strong> ${currentResult.notes || 'لا توجد'}</div>
