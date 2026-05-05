@@ -574,5 +574,15 @@ app.delete('/api/requests/:id', authenticateAdmin, async (req, res) => {
   }
 });
 
+// ✅ Serve index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ✅ Serve login.html
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
 const port = process.env.PORT || 3000;
 module.exports = app;
