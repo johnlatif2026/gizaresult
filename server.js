@@ -584,5 +584,9 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// ✅ صفحة Dashboard (محمية بـ JWT)
+app.get('/dashboard', authenticateAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
 const port = process.env.PORT || 3000;
 module.exports = app;
