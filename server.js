@@ -5,8 +5,37 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const admin = require('firebase-admin');
-const jwt = require('jsonwebtoken'); // ✅ إضافة JWT
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
+
+// ✅ إضافة Cloudinary
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+
+// ✅ إعداد Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// ✅ إعداد التخزين على Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'gizaresult',
+    format: async (req, file) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (ext === '.png') return 'png';
+      if (ext === '.jpg' || ext === '.jpeg') return 'jpg';
+      return 'png';
+    },
+    public_id: (req, file) => Date.now() + '-' + Math.round(Math.random() * 1E9)
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // ✅ قراءة JSON الخاص بـ Firebase من متغير البيئة FIREBASE_CONFIG
 const serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
@@ -23,23 +52,27 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ✅ إلغاء استخدام المجلد المحلي
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(fileUpload());
 
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+// ✅ إلغاء إنشاء مجلد uploads محلي
+// const uploadsDir = path.join(__dirname, 'uploads');
+// if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
 // إعداد nodemailer مع بيانات SMTP من .env
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,       // مثلاً smtp.gmail.com
-  port: process.env.SMTP_PORT,       // غالباً 465 (SSL) أو 587 (TLS)
-  secure: process.env.SMTP_SECURE === 'true', // true لو SSL
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
-    user: process.env.SMTP_USER,     // إيميل الإرسال
-    pass: process.env.SMTP_PASS      // كلمة سر التطبيق (App Password)
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   }
 });
-// ✅ Middleware للتحقق من JWT - معدل
+
+// ✅ Middleware للتحقق من JWT
 function authenticateAdmin(req, res, next) {
   const authHeader = req.headers['authorization'];
   
@@ -48,7 +81,7 @@ function authenticateAdmin(req, res, next) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });
   }
 
-  const token = authHeader.split(' ')[1]; // "Bearer TOKEN"
+  const token = authHeader.split(' ')[1];
   
   if (!token) {
     console.log('صيغة Authorization header غير صحيحة');
@@ -115,7 +148,7 @@ app.get('/api/requests', authenticateAdmin, async (req, res) => {
     const requests = snap.docs.map(doc => {
       const data = doc.data();
       if (data.screenshot && data.screenshot !== '') {
-        data.screenshot = `/uploads/${data.screenshot}`;
+        data.screenshot = data.screenshot; // Cloudinary URL
       } else {
         data.screenshot = null;
       }
@@ -133,19 +166,14 @@ app.get('/pay', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pay.html'));
 });
 
-// رفع طلب الدفع
-app.post('/pay', async (req, res) => {
+// ✅ رفع طلب الدفع باستخدام Cloudinary
+app.post('/pay', upload.single('screenshot'), async (req, res) => {
   try {
     const { nationalId, seatNumber, phone, email } = req.body;
-    if (!req.files || !req.files.screenshot) {
+    
+    if (!req.file) {
       return res.status(400).send('يجب رفع سكرين التحويل');
     }
-
-    const screenshot = req.files.screenshot;
-    const filename = Date.now() + path.extname(screenshot.name);
-    const uploadPath = path.join(uploadsDir, filename);
-
-    await screenshot.mv(uploadPath);
 
     // تنظيف رقم الهاتف قبل الحفظ
     const cleanPhone = phone.replace(/\D/g, '');
@@ -153,9 +181,9 @@ app.post('/pay', async (req, res) => {
     const newRequest = {
       nationalId,
       seatNumber,
-      phone: cleanPhone, // حفظ رقم الهاتف بعد التنظيف
+      phone: cleanPhone,
       email,
-      screenshot: filename,
+      screenshot: req.file.path, // Cloudinary URL
       paid: false,
       created_at: new Date().toISOString()
     };
@@ -177,23 +205,17 @@ app.post('/pay', async (req, res) => {
   }
 });
 
-// الحجز
-app.post('/reserve', async (req, res) => {
+// ✅ الحجز باستخدام Cloudinary
+app.post('/reserve', upload.single('screenshot'), async (req, res) => {
   try {
     const { nationalId, phone, email, senderPhone } = req.body;
     if (!nationalId || !phone || !email || !senderPhone) {
       return res.status(400).send('البيانات غير مكتملة');
     }
 
-    if (!req.files || !req.files.screenshot) {
+    if (!req.file) {
       return res.status(400).send('يجب رفع سكرين التحويل');
     }
-
-    const screenshot = req.files.screenshot;
-    const filename = Date.now() + path.extname(screenshot.name);
-    const uploadPath = path.join(uploadsDir, filename);
-
-    await screenshot.mv(uploadPath);
 
     // تنظيف أرقام الهواتف قبل الحفظ
     const cleanPhone = phone.replace(/\D/g, '');
@@ -204,7 +226,7 @@ app.post('/reserve', async (req, res) => {
       phone: cleanPhone,
       email,
       senderPhone: cleanSenderPhone,
-      screenshot: filename,
+      screenshot: req.file.path, // Cloudinary URL
       reserved_at: new Date().toISOString()
     };
 
@@ -225,23 +247,17 @@ app.post('/reserve', async (req, res) => {
   }
 });
 
-// ✅ API جديدة للحجز عن طريق التليفون
-app.post('/api/reserve-by-phone', async (req, res) => {
+// ✅ API جديدة للحجز عن طريق التليفون باستخدام Cloudinary
+app.post('/api/reserve-by-phone', upload.single('screenshot'), async (req, res) => {
   try {
     const { nationalId, phone, email, senderPhone } = req.body;
     if (!nationalId || !phone || !email || !senderPhone) {
       return res.status(400).json({ success: false, message: 'البيانات غير مكتملة' });
     }
 
-    if (!req.files || !req.files.screenshot) {
+    if (!req.file) {
       return res.status(400).json({ success: false, message: 'يجب رفع سكرين التحويل' });
     }
-
-    const screenshot = req.files.screenshot;
-    const filename = Date.now() + path.extname(screenshot.name);
-    const uploadPath = path.join(uploadsDir, filename);
-
-    await screenshot.mv(uploadPath);
 
     // تنظيف أرقام الهواتف قبل الحفظ
     const cleanPhone = phone.replace(/\D/g, '');
@@ -252,14 +268,13 @@ app.post('/api/reserve-by-phone', async (req, res) => {
       phone: cleanPhone,
       email,
       senderPhone: cleanSenderPhone,
-      screenshot: filename,
+      screenshot: req.file.path, // Cloudinary URL
       reserved_at: new Date().toISOString(),
-      method: 'phone' // ✅ عشان نفرق انه حجز بالتليفون
+      method: 'phone'
     };
 
     await db.collection('reservations').add(newReservation);
 
-    // إشعارات
     await sendEmailNotification(
       '📞 طلب حجز جديد عن طريق التليفون',
       `طلب حجز جديد:\n${JSON.stringify(newReservation, null, 2)}`
@@ -275,11 +290,10 @@ app.post('/api/reserve-by-phone', async (req, res) => {
   }
 });
 
-// تسجيل الدخول للادمن => توليد JWT
+// باقي الكود كما هو دون تغيير...
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
-    // زيادة مدة الصلاحية إلى 24 ساعة
     const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '24h' });
     return res.json({ 
       success: true, 
@@ -290,7 +304,6 @@ app.post('/login', (req, res) => {
   res.status(401).json({ success: false, message: 'خطأ في تسجيل الدخول' });
 });
 
-// ✅ التحقق من النتيجة للطالب (إصدار محسّن)
 app.post('/api/check-result', async (req, res) => {
   const { phone, seatNumber } = req.body;
 
@@ -298,7 +311,6 @@ app.post('/api/check-result', async (req, res) => {
     const requestsRef = db.collection('requests');
     let query = requestsRef.where('phone', '==', phone);
     
-    // إضافة البحث برقم الجلوس إذا كان متوفراً
     if (seatNumber) {
       query = requestsRef.where('seatNumber', '==', seatNumber);
     }
@@ -322,7 +334,6 @@ app.post('/api/check-result', async (req, res) => {
       });
     }
 
-    // إذا كانت النتيجة مخزنة مباشرة في الطلب
     if (requestData.result) {
       return res.json({
         success: true,
@@ -330,7 +341,6 @@ app.post('/api/check-result', async (req, res) => {
       });
     }
 
-    // إذا كانت النتيجة في مجموعة منفصلة (results)
     if (requestData.seatNumber) {
       const resultsRef = db.collection('results');
       const resultSnap = await resultsRef.where('seatNumber', '==', requestData.seatNumber).get();
@@ -339,7 +349,6 @@ app.post('/api/check-result', async (req, res) => {
         const resultDoc = resultSnap.docs[0];
         const resultData = resultDoc.data();
         
-        // تحديث الطلب بتفاصيل النتيجة
         await requestDoc.ref.update({
           result: resultData
         });
@@ -365,7 +374,6 @@ app.post('/api/check-result', async (req, res) => {
   }
 });
 
-// ✅ فتح نتيجة (إدارة فقط) - إصدار محسّن
 app.post('/api/open-result', authenticateAdmin, async (req, res) => {
   const { seatNumber } = req.body;
   
@@ -373,7 +381,6 @@ app.post('/api/open-result', authenticateAdmin, async (req, res) => {
     const requestsRef = db.collection('requests');
     const resultsRef = db.collection('results');
 
-    // البحث عن الطلب باستخدام رقم الجلوس
     const requestSnap = await requestsRef.where('seatNumber', '==', seatNumber).get();
     
     if (requestSnap.empty) {
@@ -385,7 +392,6 @@ app.post('/api/open-result', authenticateAdmin, async (req, res) => {
 
     const requestDoc = requestSnap.docs[0];
     
-    // البحث عن النتيجة باستخدام رقم الجلوس
     const resultSnap = await resultsRef.where('seatNumber', '==', seatNumber).get();
     
     if (resultSnap.empty) {
@@ -398,7 +404,6 @@ app.post('/api/open-result', authenticateAdmin, async (req, res) => {
     const resultDoc = resultSnap.docs[0];
     const resultData = resultDoc.data();
 
-    // تحديث الطلب بحالة الدفع والنتيجة
     await requestDoc.ref.update({
       paid: true,
       result: resultData,
@@ -419,7 +424,7 @@ app.post('/api/open-result', authenticateAdmin, async (req, res) => {
   }
 });
 
-// إضافة رسالة الرد (الإيميل والرسالة) من الادمن (محمي) + إرسال إيميل فعلي
+// باقي الـ endpoints كما هي بدون تغيير...
 app.post('/api/send-admin-message', authenticateAdmin, async (req, res) => {
   const { email, message } = req.body;
   if (!email || !message) {
@@ -427,7 +432,6 @@ app.post('/api/send-admin-message', authenticateAdmin, async (req, res) => {
   }
 
   try {
-    // إرسال الإيميل
     await transporter.sendMail({
       from: `"gizaresult" <${process.env.SMTP_USER}>`,
       to: email,
@@ -436,9 +440,6 @@ app.post('/api/send-admin-message', authenticateAdmin, async (req, res) => {
       html: `<p>${message}</p>`
     });
 
-    // حفظ الرسالة بعد الإرسال
-    adminMessages.push({ email, message, sentAt: new Date() });
-
     res.json({ message: 'تم إرسال الرسالة بنجاح' });
   } catch (err) {
     console.error('خطأ في إرسال الإيميل:', err);
@@ -446,41 +447,6 @@ app.post('/api/send-admin-message', authenticateAdmin, async (req, res) => {
   }
 });
 
-// إرسال رسالة للادمن من الدردشة وحفظها في Firestore
-app.post('/api/send-admin-message', async (req, res) => {
-  const { message, userData } = req.body;
-  if (!message) return res.json({ success: false, message: 'الرسالة فارغة' });
-
-  try {
-    const newChatInquiry = {
-      message,
-      userData: userData || {},
-      created_at: new Date().toISOString(),
-      status: 'new'
-    };
-
-    const docRef = await db.collection('chat_inquiries').add(newChatInquiry);
-
-    // إرسال إشعار للادمن
-    const telegramMessage = `
-<b>استفسار جديد من الدردشة:</b>
-👤 <b>الاسم:</b> ${userData.name || "غير معروف"}
-📞 <b>الهاتف:</b> ${userData.phone || "غير معروف"}
-📧 <b>البريد:</b> ${userData.email || "غير معروف"}
-
-💬 <b>الرسالة:</b>
-${message}
-    `;
-    await sendTelegramNotification(telegramMessage);
-
-    res.json({ success: true, id: docRef.id });
-  } catch (error) {
-    console.error('Error sending admin message:', error);
-    res.json({ success: false });
-  }
-});
-
-// ✅ API لاستقبال استفسارات الدردشة من المستخدمين
 app.post('/api/chat-inquiries', async (req, res) => {
   try {
     const { message, userData } = req.body;
@@ -499,10 +465,8 @@ app.post('/api/chat-inquiries', async (req, res) => {
       status: 'new'
     };
 
-    // حفظ الاستفسار في Firestore
     const docRef = await db.collection('chat_inquiries').add(newInquiry);
 
-    // إرسال إشعار للادمن عبر التليجرام
     const telegramMessage = `
 <b>💬 استفسار جديد من الدردشة:</b>
 👤 <b>الاسم:</b> ${userData.name || "غير معروف"}
@@ -531,6 +495,7 @@ ${message}
     });
   }
 });
+
 // ========== APIs إدارية (محميّة بـ JWT) ==========
 app.get('/api/chat-inquiries', authenticateAdmin, async (req, res) => {
   try {
@@ -609,6 +574,5 @@ app.delete('/api/requests/:id', authenticateAdmin, async (req, res) => {
   }
 });
 
-// ==============================================
 const port = process.env.PORT || 3000;
 module.exports = app;
