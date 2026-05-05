@@ -494,6 +494,32 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.25);
   }
   
+  .progress-bar {
+    width: 100%;
+    height: 30px;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 15px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    width: 0%;
+  }
+  
+  .mt-4 {
+    margin-top: 1rem;
+  }
+  
   /* تحسينات للاستجابة */
   @media (max-width: 1200px) {
     .sidebar {
@@ -826,13 +852,18 @@
     </div>
   </div>
 
-  <!-- إرسال البريد -->
+  <!-- إرسال النتيجة -->
   <div id="send" class="section hidden">
     <h2 class="section-title">
       <i class="fas fa-envelope"></i>
       إرسال النتيجة عبر البريد
     </h2>
-    <div class="card max-w-md mx-auto">
+    
+    <div class="card">
+      <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+        <i class="fas fa-paper-plane"></i>
+        إرسال فردي
+      </h3>
       <form id="sendForm" class="space-y-4">
         <div>
           <label class="block text-gray-700 mb-2 dark:text-gray-300">رقم الجلوس</label>
@@ -845,15 +876,54 @@
         </div>
         
         <div>
-          <label class="block text-gray-700 mb-2 dark:text-gray-300">نص الرسالة</label>
-          <textarea id="sendMessage" placeholder="أدخل نص الرسالة (اختياري)" rows="4"></textarea>
+          <label class="block text-gray-700 mb-2 dark:text-gray-300">رسالة خاصة (اختياري)</label>
+          <textarea id="sendMessage" placeholder="يمكنك إضافة رسالة تهنئة أو تعليمات..." rows="4"></textarea>
         </div>
         
         <button type="submit" class="action-btn send-btn w-full py-3">
           <i class="fas fa-paper-plane"></i>
-          إرسال
+          إرسال النتيجة
         </button>
       </form>
+    </div>
+    
+    <!-- قسم الإرسال الجماعي -->
+    <div class="card mt-4">
+      <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+        <i class="fas fa-users"></i>
+        إرسال جماعي للنتائج
+      </h3>
+      
+      <form id="bulkSendForm" class="space-y-4">
+        <div>
+          <label class="block text-gray-700 mb-2 dark:text-gray-300">
+            أرقام الجلوس (واحد في كل سطر)
+          </label>
+          <textarea id="bulkSeatNumbers" rows="5" 
+            placeholder="12345&#10;67890&#10;11223" required></textarea>
+          <small class="text-gray-500">أدخل كل رقم جلوس في سطر منفصل</small>
+        </div>
+        
+        <div>
+          <label class="block text-gray-700 mb-2 dark:text-gray-300">
+            رسالة موحدة (اختياري)
+          </label>
+          <textarea id="bulkMessage" rows="3" 
+            placeholder="رسالة تهنئة موحدة لجميع الطلاب..."></textarea>
+        </div>
+        
+        <button type="submit" class="action-btn send-btn w-full py-3" id="bulkSendBtn">
+          <i class="fas fa-paper-plane"></i>
+          إرسال للجميع
+        </button>
+      </form>
+      
+      <div id="bulkProgress" class="hidden mt-4">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <p id="progressText" class="text-center mt-2"></p>
+      </div>
     </div>
   </div>
 </div>
@@ -928,12 +998,10 @@ function showNotification(message, type = 'info') {
 
 // عند تحميل الصفحة، تحقق من المصادقة
 document.addEventListener('DOMContentLoaded', function() {
-  // تهيئة الثيم
   initTheme();
   
   if (!checkAuth()) return;
   
-  // إعداد القائمة الجانبية للجوال
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   const sidebar = document.getElementById('sidebar');
   
@@ -941,7 +1009,6 @@ document.addEventListener('DOMContentLoaded', function() {
     sidebar.classList.toggle('active');
   });
   
-  // إغلاق القائمة عند النقر خارجها (للجوال)
   document.addEventListener('click', function(event) {
     if (window.innerWidth <= 768 && 
         !sidebar.contains(event.target) && 
@@ -951,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // إذا كانت المصادقة صحيحة، قم بتحميل البيانات
   showSection('requests');
   loadRequests();
   loadResults();
@@ -961,21 +1027,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function showSection(id){
   if (!checkAuth()) return;
   
-  // إغلاق القائمة الجانبية على الجوال
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('active');
   }
   
-  // إخفاء جميع الأقسام
   document.querySelectorAll('.section').forEach(sec => {
     sec.classList.add('hidden');
   });
   
-  // إظهار القسم المطلوب
   const targetSection = document.getElementById(id);
   if (targetSection) targetSection.classList.remove('hidden');
   
-  // عند عرض قسم استفسارات الدردشة، قم بتحميل البيانات
   if (id === 'chatInquiries') {
     loadChatInquiries();
   }
@@ -1135,7 +1197,7 @@ async function loadReservations(){
           <td>${reservation.phone}</td>
           <td>${reservation.email}</td>
           <td>${reservation.senderPhone || 'غير متوفر'}</td>
-          <td>${reservation.screenshot ? `<img class="screenshot" src="/uploads/${reservation.screenshot}" alt="صورة التحويل" />` : 'لا يوجد'}</td>
+          <td>${reservation.screenshot ? `<img class="screenshot" src="${reservation.screenshot}" alt="صورة التحويل" />` : 'لا يوجد'}</td>
           <td>${reservation.reserved_at ? new Date(reservation.reserved_at).toLocaleString('ar-EG') : ''}</td>
           <td>
             <button class="action-btn delete-btn" onclick="deleteReservation('${reservation.id}')">
@@ -1331,7 +1393,7 @@ async function markAsRead(id) {
       headers: getAuthHeaders()
     });
     showNotification('تم تمييز الاستفسار كمقروء', 'success');
-    loadChatInquiries(); // إعادة تحميل البيانات
+    loadChatInquiries();
   } catch (error) {
     console.error('Error marking as read:', error);
     showNotification('حدث خطأ أثناء تمييز الاستفسار', 'error');
@@ -1349,7 +1411,7 @@ async function deleteInquiry(id) {
         headers: getAuthHeaders()
       });
       showNotification('تم حذف الاستفسار بنجاح', 'success');
-      loadChatInquiries(); // إعادة تحميل البيانات
+      loadChatInquiries();
     } catch (error) {
       console.error('Error deleting inquiry:', error);
       showNotification('حدث خطأ أثناء حذف الاستفسار', 'error');
@@ -1357,7 +1419,7 @@ async function deleteInquiry(id) {
   }
 }
 
-// إرسال البريد مباشرة
+// إرسال البريد بشكل احترافي
 async function sendEmailPrompt(seatNumber){
   if (!checkAuth()) return;
   
@@ -1367,20 +1429,19 @@ async function sendEmailPrompt(seatNumber){
     return;
   }
   
-  // التحقق من صحة البريد الإلكتروني
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     showNotification('يرجى إدخال بريد إلكتروني صحيح', 'error');
     return;
   }
   
-  const message = prompt('نص الرسالة:');
+  const message = prompt('نص الرسالة (اختياري):');
   
   try {
     const res = await fetch('/api/send-admin-message', {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({seatNumber,email,message})
+      body: JSON.stringify({ seatNumber, email, message: message || '' })
     });
     
     if (res.status === 401 || res.status === 403) {
@@ -1390,9 +1451,9 @@ async function sendEmailPrompt(seatNumber){
     
     const data = await res.json();
     if (data.success) {
-      showNotification('تم إرسال البريد بنجاح', 'success');
+      showNotification(data.message, 'success');
     } else {
-      showNotification('خطأ: ' + data.message, 'error');
+      showNotification('خطأ: ' + (data.message || data.error), 'error');
     }
   } catch (error) {
     console.error('Error sending email:', error);
@@ -1400,7 +1461,7 @@ async function sendEmailPrompt(seatNumber){
   }
 }
 
-// إرسال النتيجة عبر البريد (نموذج الإرسال)
+// إرسال النتيجة (نموذج الإرسال الفردي)
 document.getElementById('sendForm')?.addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!checkAuth()) return;
@@ -1409,18 +1470,22 @@ document.getElementById('sendForm')?.addEventListener('submit', async function(e
   const email = document.getElementById('sendEmail').value;
   const message = document.getElementById('sendMessage').value;
   
-  // التحقق من صحة البريد الإلكتروني
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     showNotification('يرجى إدخال بريد إلكتروني صحيح', 'error');
     return;
   }
   
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+  submitBtn.disabled = true;
+  
   try {
     const res = await fetch('/api/send-admin-message', {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({seatNumber,email,message})
+      body: JSON.stringify({ seatNumber, email, message })
     });
     
     if (res.status === 401 || res.status === 403) {
@@ -1430,14 +1495,106 @@ document.getElementById('sendForm')?.addEventListener('submit', async function(e
     
     const data = await res.json();
     if (data.success) {
-      showNotification('تم الإرسال بنجاح', 'success');
+      showNotification('✅ ' + data.message, 'success');
       document.getElementById('sendForm').reset();
     } else {
-      showNotification('خطأ: ' + data.message, 'error');
+      showNotification('❌ ' + (data.message || data.error), 'error');
     }
   } catch (error) {
     console.error('Error sending email:', error);
-    showNotification('حدث خطأ أثناء الإرسال', 'error');
+    showNotification('❌ حدث خطأ أثناء إرسال البريد', 'error');
+  } finally {
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+});
+
+// الإرسال الجماعي
+document.getElementById('bulkSendForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!checkAuth()) return;
+  
+  const seatNumbersText = document.getElementById('bulkSeatNumbers').value;
+  const bulkMessage = document.getElementById('bulkMessage').value;
+  
+  if (!seatNumbersText.trim()) {
+    showNotification('يرجى إدخال أرقام الجلوس', 'error');
+    return;
+  }
+  
+  const seatNumbersArray = seatNumbersText.split('\n')
+    .filter(line => line.trim())
+    .map(line => ({ seatNumber: line.trim() }));
+  
+  if (seatNumbersArray.length === 0) {
+    showNotification('لم يتم العثور على أرقام صالحة', 'error');
+    return;
+  }
+  
+  if (!confirm(`سيتم إرسال النتائج إلى ${seatNumbersArray.length} طالب. هل أنت متأكد؟`)) {
+    return;
+  }
+  
+  const submitBtn = document.getElementById('bulkSendBtn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+  submitBtn.disabled = true;
+  
+  const progressDiv = document.getElementById('bulkProgress');
+  progressDiv.classList.remove('hidden');
+  const progressFill = document.querySelector('.progress-fill');
+  const progressText = document.getElementById('progressText');
+  
+  progressFill.style.width = '0%';
+  progressText.innerHTML = 'جاري الإرسال...';
+  
+  try {
+    const res = await fetch('/api/send-bulk-results', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ 
+        seatNumbers: seatNumbersArray,
+        customMessage: bulkMessage || ''
+      })
+    });
+    
+    if (res.status === 401 || res.status === 403) {
+      logout();
+      return;
+    }
+    
+    const data = await res.json();
+    
+    progressFill.style.width = '100%';
+    progressText.innerHTML = `
+      ✅ تم الإرسال: ${data.sent} من ${data.total}<br>
+      ❌ فشل: ${data.failed}
+    `;
+    
+    if (data.sent > 0) {
+      showNotification(`✅ تم إرسال ${data.sent} نتيجة بنجاح`, 'success');
+    }
+    
+    if (data.failed > 0) {
+      console.log('Failed sends:', data.errors);
+      showNotification(`⚠️ فشل إرسال ${data.failed} نتيجة`, 'error');
+    }
+    
+    if (data.errors.length > 0) {
+      console.table(data.errors);
+    }
+    
+    setTimeout(() => {
+      progressDiv.classList.add('hidden');
+    }, 5000);
+    
+  } catch (error) {
+    console.error('Error in bulk send:', error);
+    showNotification('❌ حدث خطأ أثناء الإرسال الجماعي', 'error');
+    progressDiv.classList.add('hidden');
+  } finally {
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
   }
 });
 
@@ -1449,11 +1606,10 @@ setInterval(() => {
   loadResults();
   loadReservations();
   
-  // إذا كان قسم استفسارات الدردشة مفتوحًا، قم بتحديثه أيضًا
   if (!document.getElementById('chatInquiries').classList.contains('hidden')) {
     loadChatInquiries();
   }
-}, 30000); // تحديث كل 30 ثانية
+}, 30000);
 
 </script>
 </body>
