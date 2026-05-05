@@ -11,9 +11,11 @@ require('dotenv').config();
 // ✅ قراءة JSON الخاص بـ Firebase من متغير البيئة FIREBASE_CONFIG
 const serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+}
 
 const db = admin.firestore();
 
