@@ -52,14 +52,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
-
-// ✅ إلغاء استخدام المجلد المحلي
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(fileUpload());
-
-// ✅ إلغاء إنشاء مجلد uploads محلي
-// const uploadsDir = path.join(__dirname, 'uploads');
-// if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
 // إعداد nodemailer مع بيانات SMTP من .env
 const transporter = nodemailer.createTransport({
@@ -72,38 +65,327 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// ✅ Middleware للتحقق من JWT
-function authenticateAdmin(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  
-  if (!authHeader) {
-    console.log('لم يتم إرسال token');
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
+// ✅ دوال إرسال البريد الإلكتروني المحسنة
+function getPercentageClass(percentage) {
+  if (percentage >= 70) return 'high';
+  if (percentage >= 50) return 'medium';
+  return 'low';
+}
 
-  const token = authHeader.split(' ')[1];
-  
-  if (!token) {
-    console.log('صيغة Authorization header غير صحيحة');
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
+async function sendProfessionalEmail(to, studentData, customMessage = '') {
+  try {
+    // تصميم HTML احترافي للبريد الإلكتروني
+    const htmlTemplate = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>نتيجة الطالب - gizaresult</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+          }
+          
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease-out;
+          }
+          
+          @keyframes slideIn {
+            from {
+              opacity: 0;
+              transform: translateY(-30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+          }
+          
+          .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 800;
+          }
+          
+          .header p {
+            font-size: 14px;
+            opacity: 0.9;
+          }
+          
+          .content {
+            padding: 40px 30px;
+            background: white;
+          }
+          
+          .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+          }
+          
+          .result-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 20px;
+          }
+          
+          .percentage {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 20px 0;
+          }
+          
+          .percentage.high {
+            color: #4CAF50;
+          }
+          
+          .percentage.medium {
+            color: #FF9800;
+          }
+          
+          .percentage.low {
+            color: #f44336;
+          }
+          
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin: 10px 0;
+          }
+          
+          .info-label {
+            font-weight: 700;
+            color: #555;
+          }
+          
+          .info-value {
+            color: #333;
+            font-weight: 500;
+          }
+          
+          .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            margin-top: 20px;
+          }
+          
+          .status-pass {
+            background: #4CAF50;
+            color: white;
+          }
+          
+          .status-fail {
+            background: #f44336;
+            color: white;
+          }
+          
+          .notes {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 4px solid #FF9800;
+          }
+          
+          .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+          }
+          
+          .footer p {
+            color: #666;
+            margin: 5px 0;
+          }
+          
+          .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 20px 0;
+            font-weight: 700;
+            transition: transform 0.3s;
+          }
+          
+          .btn:hover {
+            transform: translateY(-2px);
+          }
+          
+          .custom-message {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 4px solid #4CAF50;
+          }
+          
+          @media (max-width: 480px) {
+            .content {
+              padding: 20px;
+            }
+            
+            .info-row {
+              flex-direction: column;
+              gap: 5px;
+            }
+            
+            .percentage {
+              font-size: 36px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🏆 نتيجة الطالب</h1>
+            <p>نظام النتائج الإلكتروني - gizaresult</p>
+          </div>
+          
+          <div class="content">
+            <div class="result-card">
+              <div class="result-title">نتيجة الاختبار</div>
+              
+              <div class="percentage ${getPercentageClass(studentData.percentage)}">
+                ${studentData.percentage}%
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">📝 رقم الجلوس:</span>
+                <span class="info-value">${studentData.seatNumber}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">👤 اسم الطالب:</span>
+                <span class="info-value">${studentData.name || 'غير محدد'}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">📚 الصف الدراسي:</span>
+                <span class="info-value">${studentData.gradeLevel || 'غير محدد'}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">🏫 المدرسة:</span>
+                <span class="info-value">${studentData.schoolName || 'غير محددة'}</span>
+              </div>
+              
+              <div class="status-badge ${studentData.percentage >= 50 ? 'status-pass' : 'status-fail'}">
+                ${studentData.percentage >= 50 ? '✓ ناجح' : '✗ غير ناجح'}
+              </div>
+            </div>
+            
+            ${studentData.notes ? `
+              <div class="notes">
+                <strong>📌 ملاحظات:</strong><br>
+                ${studentData.notes}
+              </div>
+            ` : ''}
+            
+            ${customMessage ? `
+              <div class="custom-message">
+                <strong>💬 رسالة خاصة:</strong><br>
+                ${customMessage}
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="footer">
+            <p>📧 هذا البريد إلكتروني آلي، يرجى عدم الرد عليه</p>
+            <p>© ${new Date().getFullYear()} gizaresult - جميع الحقوق محفوظة</p>
+            <p style="font-size: 12px; margin-top: 10px;">
+              تم إرسال هذه النتيجة بشكل آمن ومشفّر
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // إرسال البريد الإلكتروني
+    const info = await transporter.sendMail({
+      from: `"gizaresult - نظام النتائج" <${process.env.SMTP_USER}>`,
+      to: to,
+      subject: '🎓 نتيجة الاختبار - نظام gizaresult الإلكتروني',
+      text: `السلام عليكم،\n\nهذه نتيجة الطالب:\nرقم الجلوس: ${studentData.seatNumber}\nالاسم: ${studentData.name}\nالنسبة: ${studentData.percentage}%\n\n${customMessage}\n\nمع أطيب التمنيات،\nفريق gizaresult`,
+      html: htmlTemplate
+    });
+    
+    console.log('Professional email sent successfully to:', to);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending professional email:', error);
+    return { success: false, error: error.message };
   }
+}
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      console.log('Token verification failed:', err.message);
-      
-      if (err.name === 'TokenExpiredError') {
-        return res.status(403).json({ success: false, message: 'Token منتهي الصلاحية' });
-      } else if (err.name === 'JsonWebTokenError') {
-        return res.status(403).json({ success: false, message: 'Token غير صالح' });
-      } else {
-        return res.status(403).json({ success: false, message: 'Forbidden' });
-      }
+async function sendResultBySeatNumber(seatNumber, email, customMessage = '') {
+  try {
+    // البحث عن نتيجة الطالب
+    const resultsRef = db.collection('results');
+    const resultSnap = await resultsRef.where('seatNumber', '==', seatNumber).get();
+    
+    if (resultSnap.empty) {
+      return { success: false, message: 'لم يتم العثور على نتيجة لهذا الرقم' };
     }
     
-    req.admin = decoded;
-    next();
-  });
+    const studentData = resultSnap.docs[0].data();
+    
+    // إرسال البريد الإلكتروني الاحترافي
+    const emailResult = await sendProfessionalEmail(email, studentData, customMessage);
+    
+    if (emailResult.success) {
+      // تسجيل عملية الإرسال في قاعدة البيانات
+      await db.collection('email_logs').add({
+        seatNumber: seatNumber,
+        email: email,
+        sentAt: new Date().toISOString(),
+        message: customMessage
+      });
+      
+      return { success: true, message: 'تم إرسال النتيجة بنجاح' };
+    } else {
+      return { success: false, message: emailResult.error };
+    }
+  } catch (error) {
+    console.error('Error sending result by seat number:', error);
+    return { success: false, message: error.message };
+  }
 }
 
 // دوال إشعارات
@@ -139,6 +421,40 @@ async function sendTelegramNotification(message) {
   }
 }
 
+// ✅ Middleware للتحقق من JWT
+function authenticateAdmin(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  
+  if (!authHeader) {
+    console.log('لم يتم إرسال token');
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  
+  if (!token) {
+    console.log('صيغة Authorization header غير صحيحة');
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.log('Token verification failed:', err.message);
+      
+      if (err.name === 'TokenExpiredError') {
+        return res.status(403).json({ success: false, message: 'Token منتهي الصلاحية' });
+      } else if (err.name === 'JsonWebTokenError') {
+        return res.status(403).json({ success: false, message: 'Token غير صالح' });
+      } else {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    }
+    
+    req.admin = decoded;
+    next();
+  });
+}
+
 // ----------------- Routes -----------------
 
 // ----------------- API الطلبات -----------------
@@ -148,7 +464,7 @@ app.get('/api/requests', authenticateAdmin, async (req, res) => {
     const requests = snap.docs.map(doc => {
       const data = doc.data();
       if (data.screenshot && data.screenshot !== '') {
-        data.screenshot = data.screenshot; // Cloudinary URL
+        data.screenshot = data.screenshot;
       } else {
         data.screenshot = null;
       }
@@ -175,7 +491,6 @@ app.post('/pay', upload.single('screenshot'), async (req, res) => {
       return res.status(400).send('يجب رفع سكرين التحويل');
     }
 
-    // تنظيف رقم الهاتف قبل الحفظ
     const cleanPhone = phone.replace(/\D/g, '');
 
     const newRequest = {
@@ -183,7 +498,7 @@ app.post('/pay', upload.single('screenshot'), async (req, res) => {
       seatNumber,
       phone: cleanPhone,
       email,
-      screenshot: req.file.path, // Cloudinary URL
+      screenshot: req.file.path,
       paid: false,
       created_at: new Date().toISOString()
     };
@@ -217,7 +532,6 @@ app.post('/reserve', upload.single('screenshot'), async (req, res) => {
       return res.status(400).send('يجب رفع سكرين التحويل');
     }
 
-    // تنظيف أرقام الهواتف قبل الحفظ
     const cleanPhone = phone.replace(/\D/g, '');
     const cleanSenderPhone = senderPhone.replace(/\D/g, '');
 
@@ -226,7 +540,7 @@ app.post('/reserve', upload.single('screenshot'), async (req, res) => {
       phone: cleanPhone,
       email,
       senderPhone: cleanSenderPhone,
-      screenshot: req.file.path, // Cloudinary URL
+      screenshot: req.file.path,
       reserved_at: new Date().toISOString()
     };
 
@@ -247,7 +561,7 @@ app.post('/reserve', upload.single('screenshot'), async (req, res) => {
   }
 });
 
-// ✅ API جديدة للحجز عن طريق التليفون باستخدام Cloudinary
+// ✅ API جديدة للحجز عن طريق التليفون
 app.post('/api/reserve-by-phone', upload.single('screenshot'), async (req, res) => {
   try {
     const { nationalId, phone, email, senderPhone } = req.body;
@@ -259,7 +573,6 @@ app.post('/api/reserve-by-phone', upload.single('screenshot'), async (req, res) 
       return res.status(400).json({ success: false, message: 'يجب رفع سكرين التحويل' });
     }
 
-    // تنظيف أرقام الهواتف قبل الحفظ
     const cleanPhone = phone.replace(/\D/g, '');
     const cleanSenderPhone = senderPhone.replace(/\D/g, '');
 
@@ -268,7 +581,7 @@ app.post('/api/reserve-by-phone', upload.single('screenshot'), async (req, res) 
       phone: cleanPhone,
       email,
       senderPhone: cleanSenderPhone,
-      screenshot: req.file.path, // Cloudinary URL
+      screenshot: req.file.path,
       reserved_at: new Date().toISOString(),
       method: 'phone'
     };
@@ -290,7 +603,6 @@ app.post('/api/reserve-by-phone', upload.single('screenshot'), async (req, res) 
   }
 });
 
-// باقي الكود كما هو دون تغيير...
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
@@ -424,27 +736,106 @@ app.post('/api/open-result', authenticateAdmin, async (req, res) => {
   }
 });
 
-// باقي الـ endpoints كما هي بدون تغيير...
+// ✅ مسار إرسال البريد الإلكتروني المحسن
 app.post('/api/send-admin-message', authenticateAdmin, async (req, res) => {
-  const { email, message } = req.body;
-  if (!email || !message) {
-    return res.status(400).json({ error: 'البريد الإلكتروني والرسالة مطلوبين' });
-  }
-
-  try {
-    await transporter.sendMail({
-      from: `"gizaresult" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: 'gizaresult',
-      text: message,
-      html: `<p>${message}</p>`
+  const { seatNumber, email, message } = req.body;
+  
+  if (!seatNumber || !email) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'رقم الجلوس والبريد الإلكتروني مطلوبين' 
     });
-
-    res.json({ message: 'تم إرسال الرسالة بنجاح' });
+  }
+  
+  try {
+    const result = await sendResultBySeatNumber(seatNumber, email, message);
+    
+    if (result.success) {
+      // إرسال إشعار للمشرف
+      await sendTelegramNotification(
+        `<b>📧 تم إرسال نتيجة بنجاح</b>\n` +
+        `رقم الجلوس: ${seatNumber}\n` +
+        `البريد الإلكتروني: ${email}\n` +
+        `الوقت: ${new Date().toLocaleString('ar-EG')}`
+      );
+      
+      res.json({ 
+        success: true, 
+        message: 'تم إرسال النتيجة إلى البريد الإلكتروني بنجاح' 
+      });
+    } else {
+      res.status(404).json({ 
+        success: false, 
+        message: result.message 
+      });
+    }
   } catch (err) {
     console.error('خطأ في إرسال الإيميل:', err);
-    res.status(500).json({ error: 'حدث خطأ أثناء إرسال الإيميل' });
+    res.status(500).json({ 
+      success: false, 
+      error: 'حدث خطأ أثناء إرسال الإيميل' 
+    });
   }
+});
+
+// ✅ مسار الإرسال الجماعي للنتائج
+app.post('/api/send-bulk-results', authenticateAdmin, async (req, res) => {
+  const { seatNumbers, customMessage } = req.body;
+  
+  if (!seatNumbers || !Array.isArray(seatNumbers) || seatNumbers.length === 0) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'يجب توفير قائمة بأرقام الجلوس' 
+    });
+  }
+  
+  const results = [];
+  const errors = [];
+  
+  for (const item of seatNumbers) {
+    try {
+      // البحث عن البريد الإلكتروني للطالب من طلبات الدفع
+      const requestsRef = db.collection('requests');
+      const requestSnap = await requestsRef.where('seatNumber', '==', item.seatNumber).get();
+      
+      if (!requestSnap.empty) {
+        const requestData = requestSnap.docs[0].data();
+        const email = item.email || requestData.email;
+        
+        if (email) {
+          const result = await sendResultBySeatNumber(item.seatNumber, email, customMessage);
+          if (result.success) {
+            results.push({ seatNumber: item.seatNumber, email, status: 'success' });
+          } else {
+            errors.push({ seatNumber: item.seatNumber, email, error: result.message });
+          }
+        } else {
+          errors.push({ seatNumber: item.seatNumber, error: 'لا يوجد بريد إلكتروني' });
+        }
+      } else {
+        errors.push({ seatNumber: item.seatNumber, error: 'لم يتم العثور على الطلب' });
+      }
+    } catch (error) {
+      errors.push({ seatNumber: item.seatNumber, error: error.message });
+    }
+  }
+  
+  // إرسال إشعار تلغرام بنتيجة الإرسال الجماعي
+  await sendTelegramNotification(
+    `<b>📧 تقرير الإرسال الجماعي للنتائج</b>\n` +
+    `✅ تم الإرسال بنجاح: ${results.length}\n` +
+    `❌ فشل الإرسال: ${errors.length}\n` +
+    `📊 المجموع: ${seatNumbers.length}`
+  );
+  
+  res.json({
+    success: true,
+    total: seatNumbers.length,
+    sent: results.length,
+    failed: errors.length,
+    results: results,
+    errors: errors
+  });
 });
 
 app.post('/api/chat-inquiries', async (req, res) => {
@@ -588,5 +979,6 @@ app.get('/login', (req, res) => {
 app.get('/dashboard', authenticateAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
+
 const port = process.env.PORT || 3000;
 module.exports = app;
