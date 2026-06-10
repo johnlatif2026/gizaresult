@@ -86,7 +86,6 @@
     box-shadow: 0 6px 12px rgba(42, 171, 238, 0.3);
   }
   
-  /* زر التطبيق الجديد */
   .btn-app {
     background: linear-gradient(to right, #FF6B6B, #FF8E53);
     color: white;
@@ -186,7 +185,7 @@
     background-color: #f9fafb;
   }
   
-  input, .file-input {
+  input {
     width: 100%;
     padding: 12px 16px;
     border: 2px solid #e5e7eb;
@@ -200,10 +199,6 @@
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     background: white;
-  }
-  
-  .file-input {
-    padding: 8px;
   }
   
   .header-icon {
@@ -252,7 +247,6 @@
     }
   }
 
-  /* تنسيقات الطباعة */
   @media print {
     body * {
       visibility: hidden;
@@ -284,7 +278,6 @@
     }
   }
 
-  /* تنسيقات النتيجة القابلة للطباعة */
   .result-header {
     text-align: center;
     margin-bottom: 20px;
@@ -320,7 +313,6 @@
     margin: 20px 0;
   }
 
-  /* نافذة الطباعة */
   .print-window {
     display: none;
     position: fixed;
@@ -372,7 +364,6 @@
     top: -9999px;
   }
 
-  /* تنسيقات الدردشة */
   #chatbot input {
     font-family: 'Tajawal', sans-serif;
     direction: rtl;
@@ -391,7 +382,6 @@
 <body class="flex flex-col items-center justify-start min-h-screen p-4">
 
 <div class="container max-w-4xl mx-auto">
-  <!-- الهيدر -->
   <header class="text-center my-8">
     <i class="fas fa-graduation-cap header-icon"></i>
     <h1 class="text-4xl font-bold mb-2 text-gray-800">نتيجتك</h1>
@@ -399,7 +389,6 @@
     <p class="text-lg text-gray-600">هذا الموقع الصف الثاني الثانوي فقط بمحافظة الجيزة</p>
   </header>
 
-  <!-- التنبيهات على شكل شبكة -->
   <div class="alert-grid">
     <div class="alert-box alert-danger">
       <i class="fas fa-exclamation-triangle alert-icon"></i>
@@ -424,7 +413,7 @@
       <p class="text-purple-800 font-bold">"ستظهر النتيجة على الصفحة الإلكترونية وسيتم أيضًا إرسالها إلى البريد الإلكتروني خلال دقيقتين تقريبًا."</p>
     </div>
   </div>
-  <!-- أزرار حجز النتيجة -->
+  
   <div class="card p-6 mb-6">
     <h2 class="text-2xl font-semibold mb-4 text-gray-800 text-center">
       <i class="fas fa-ticket-alt"></i>
@@ -433,7 +422,6 @@
     <h2>برجاء للحجز دفع المبلغ 25 جنيهاً الى الرقم هذا</h2>
     <h1>01274445091</h1>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      
       <button onclick="showReservation()" class="btn-secondary">
         <i class="fas fa-globe"></i>
         حجز عبر الموقع
@@ -441,49 +429,41 @@
     </div>
   </div>
 
-<!-- قسم حجز النتيجة عبر الموقع -->
-<div class="card p-6 mb-6 hidden" id="reservation">
-  <h2 class="text-2xl font-semibold mb-4 text-gray-800">
-    <i class="fas fa-globe"></i>
-    حجز النتيجة عبر الموقع
-  </h2>
-  
-  <form id="reservationForm" class="space-y-4">
-    <div>
-      <label class="block text-gray-700 mb-2">الرقم القومي</label>
-      <input name="nationalId" placeholder="أدخل الرقم القومي" required class="w-full p-3 border rounded-lg">
-    </div>
+  <!-- قسم حجز النتيجة عبر الموقع - من غير رفع ملفات -->
+  <div class="card p-6 mb-6 hidden" id="reservation">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+      <i class="fas fa-globe"></i>
+      حجز النتيجة عبر الموقع
+    </h2>
     
-    <div>
-      <label class="block text-gray-700 mb-2">رقم الهاتف</label>
-      <input name="phone" placeholder="أدخل رقم الهاتف" required class="w-full p-3 border rounded-lg">
-    </div>
-    
-    <div>
-      <label class="block text-gray-700 mb-2">البريد الإلكتروني</label>
-      <input name="email" type="email" placeholder="أدخل البريد الإلكتروني" required class="w-full p-3 border rounded-lg">
-    </div>
-    
-    <!-- الحقول الجديدة المطلوبة -->
-    <div>
-      <label class="block text-gray-700 mb-2">رقم المحول (الرقم الذي تم التحويل منه)</label>
-      <input name="senderPhone" placeholder="أدخل رقم الهاتف المحول منه" required class="w-full p-3 border rounded-lg">
-    </div>
-    
-    <div>
-      <label class="block text-gray-700 mb-2">سكرين شوت التحويل</label>
-      <input type="file" name="screenshot" required class="file-input">
-    </div>
-    <!-- نهاية الحقول الجديدة -->
-    
-    <button type="submit" class="btn-primary w-full py-3">
-      <i class="fas fa-check-circle"></i>
-      تأكيد الحجز
-    </button>
-  </form>
-</div>
+    <form id="reservationForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 mb-2">الرقم القومي</label>
+        <input name="nationalId" placeholder="أدخل الرقم القومي" required class="w-full p-3 border rounded-lg">
+      </div>
+      
+      <div>
+        <label class="block text-gray-700 mb-2">رقم الهاتف</label>
+        <input name="phone" placeholder="أدخل رقم الهاتف" required class="w-full p-3 border rounded-lg">
+      </div>
+      
+      <div>
+        <label class="block text-gray-700 mb-2">البريد الإلكتروني</label>
+        <input name="email" type="email" placeholder="أدخل البريد الإلكتروني" required class="w-full p-3 border rounded-lg">
+      </div>
+      
+      <div>
+        <label class="block text-gray-700 mb-2">رقم المحول (الرقم الذي تم التحويل منه)</label>
+        <input name="senderPhone" placeholder="أدخل رقم الهاتف المحول منه" required class="w-full p-3 border rounded-lg">
+      </div>
+      
+      <button type="submit" class="btn-primary w-full py-3">
+        <i class="fas fa-check-circle"></i>
+        تأكيد الحجز
+      </button>
+    </form>
+  </div>
 
-  <!-- الأزرار الرئيسية -->
   <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
     <button onclick="showPayment()" class="btn-primary">
       <i class="fas fa-money-bill-wave"></i>
@@ -495,7 +475,7 @@
     </button>
   </div>
 
-  <!-- قسم الدفع -->
+  <!-- قسم الدفع - من غير رفع ملفات -->
   <div class="card p-6 mb-6 hidden" id="payment">
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">
       <i class="fas fa-credit-card"></i>
@@ -532,14 +512,9 @@
         <input name="email" type="email" placeholder="أدخل البريد الإلكتروني" required class="w-full p-3 border rounded-lg">
       </div>
       
-      <div>
-        <label class="block text-gray-700 mb-2">صورة إثبات التحويل</label>
-        <input type="file" name="screenshot" required class="file-input">
-      </div>
-      
       <button type="submit" class="btn-primary w-full py-3">
         <i class="fas fa-check-circle"></i>
-        تأكيد الدفع وإرسال البيانات(برجاء الضغط على الزر مرة واحدة ثم انتظر تحميل التصفح)
+        تأكيد الدفع وإرسال البيانات
       </button>
     </form>
   </div>
@@ -563,13 +538,11 @@
       </button>
     </form>
 
-    <!-- نتائج الاستعلام -->
     <div id="resultContainer" class="mt-6 hidden">
       <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg text-center mb-6">
         <h3 class="text-xl font-bold">تهانينا! هذه هي نتيجتك</h3>
       </div>
       
-      <!-- النتيجة القابلة للطباعة -->
       <div id="printableResult">
         <div class="result-header">
           <h2>نتيجة الطالب</h2>
@@ -592,11 +565,7 @@
           </h3>
           <table id="mainSubjectsTable">
             <thead>
-              <tr>
-                <th>المادة</th>
-                <th>الدرجة</th>
-                <th>من</th>
-              </tr>
+              <tr><th>المادة</th><th>الدرجة</th><th>من</th></tr>
             </thead>
             <tbody></tbody>
           </table>
@@ -609,11 +578,7 @@
           </h3>
           <table id="additionalSubjectsTable">
             <thead>
-              <tr>
-                <th>المادة</th>
-                <th>الدرجة</th>
-                <th>من</th>
-              </tr>
+              <tr><th>المادة</th><th>الدرجة</th><th>من</th></tr>
             </thead>
             <tbody></tbody>
           </table>
@@ -625,30 +590,19 @@
             الإجمالي والنسبة
           </h3>
           <table>
-            <tr>
-              <th>المجموع الكلي</th>
-              <td id="totalScore" class="font-bold"></td>
-            </tr>
-            <tr>
-              <th>المجموع الكلي الممكن</th>
-              <td id="totalOutOf"></td>
-            </tr>
-            <tr>
-              <th>النسبة المئوية</th>
-              <td id="percentage" class="font-bold text-green-600"></td>
-            </tr>
-          </table>
+            <tr><th>المجموع الكلي</th><td id="totalScore" class="font-bold"></td></tr>
+            <tr><th>المجموع الكلي الممكن</th><td id="totalOutOf"></td></tr>
+            <tr><th>النسبة المئوية</th><td id="percentage" class="font-bold text-green-600"></td></tr>
+           </table>
         </div>
-          <button onclick="saveAsPDF()" class="btn-secondary ml-4">
-            <i class="fas fa-file-pdf"></i>
-            حفظ كPDF
-          </button>
-        </div>
+        <button onclick="saveAsPDF()" class="btn-secondary ml-4">
+          <i class="fas fa-file-pdf"></i>
+          حفظ كPDF
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- المميزات -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-8">
     <div class="card p-4 text-center">
       <i class="fas fa-lock feature-icon"></i>
@@ -669,7 +623,6 @@
     </div>
   </div>
 
-  <!-- الفوتر -->
   <div class="footer text-center rounded-lg">
     <p>هذا الموقع غير تابع لأي جهة حكومية أو وزارة</p>
     <p class="mt-2">
@@ -680,14 +633,13 @@
     </p>
   </div>
 </div>
-<!-- زر فتح/غلق الدردشة -->
+
 <div id="chatbotToggle" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
   <button onclick="toggleChatbot()" style="background:#3b82f6; color:white; border:none; padding:12px 20px; border-radius:50px; cursor:pointer; font-weight:bold;">
     💬 الدعم
   </button>
 </div>
 
-<!-- نافذة الدردشة المعدلة -->
 <div id="chatbot" style="position: fixed; bottom: 80px; right: 20px; width: 320px; max-height: 400px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display:none; flex-direction: column; overflow:hidden; z-index: 1000; font-family: 'Tajawal', sans-serif;">
   <div style="background:#3b82f6; color:white; padding:10px; font-weight:bold; text-align:center; cursor:pointer;" onclick="toggleChatbot()">
     دعم فني - أدخل بياناتك أولاً
@@ -698,7 +650,6 @@
     <button class="chatOption" data-action="ask" style="padding:8px; border-radius:8px; border:none; background:#8b5cf6; color:white; cursor:pointer;">استفسار عن شيء</button>
   </div>
   
-  <!-- نموذج إدخال بيانات المستخدم -->
   <div id="userDataForm" style="padding:10px; display:flex; flex-direction:column; gap:8px;">
     <input type="text" id="userName" placeholder="الاسم بالكامل" style="padding:8px; border-radius:8px; border:1px solid #ddd;">
     <input type="tel" id="userPhone" placeholder="رقم التليفون" style="padding:8px; border-radius:8px; border:1px solid #ddd;">
@@ -706,19 +657,12 @@
     <button id="submitUserData" style="padding:8px; border-radius:8px; border:none; background:#3b82f6; color:white; cursor:pointer;">تأكيد البيانات</button>
   </div>
 </div>
-<!-- حاوية مخفية لإنشاء PDF -->
+
 <div id="pdf-container" style="position: absolute; left: -9999px; top: -9999px;"></div>
 
 <script>
-// متغير لتخزين النتيجة الحالية
 let currentResult = null;
-
-// متغيرات لتخزين بيانات المستخدم في الدردشة
-let userData = {
-  name: '',
-  phone: '',
-  email: ''
-};
+let userData = { name: '', phone: '', email: '' };
 
 function showPayment() {
   document.getElementById('payment').classList.remove('hidden');
@@ -743,7 +687,6 @@ document.getElementById('checkForm').addEventListener('submit', async e => {
   e.preventDefault();
   const phone = document.getElementById('phoneInput').value;
 
-  // عرض رسالة تحميل
   const submitBtn = e.target.querySelector('button[type="submit"]');
   const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = '<i class="fas fa-spinner spinner"></i> جاري البحث...';
@@ -766,34 +709,34 @@ document.getElementById('checkForm').addEventListener('submit', async e => {
     displayResult(data.result);
     
   } catch (error) {
-    alert(error.message || 'لم يتم العثور على نتيجة لهذا الرقم أو لم يتم الدفع بعد');
+    alert(error.message || 'لم يتم العثور على نتيجة');
     console.error('Error:', error);
   } finally {
     submitBtn.innerHTML = originalText;
     submitBtn.disabled = false;
   }
 });
-// معالجة حجز النتيجة
+
+// معالجة حجز النتيجة (من غير ملف)
 document.getElementById('reservationForm').addEventListener('submit', async e => {
   e.preventDefault();
   
   const formData = new FormData(e.target);
-  
-  // التحقق من وجود ملف
-  if (!formData.get('screenshot') || formData.get('screenshot').size === 0) {
-    alert('يرجى رفع صورة إثبات التحويل');
-    return;
-  }
-
   const submitBtn = e.target.querySelector('button[type="submit"]');
   const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = '<i class="fas fa-spinner spinner"></i> جاري الحجز...';
   submitBtn.disabled = true;
 
   try {
+    const formObject = {};
+    formData.forEach((value, key) => {
+      formObject[key] = value;
+    });
+
     const res = await fetch('/reserve', {
       method: 'POST',
-      body: formData
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formObject)
     });
 
     if (res.ok) {
@@ -805,7 +748,7 @@ document.getElementById('reservationForm').addEventListener('submit', async e =>
       throw new Error(errorText || 'فشل في تسجيل الحجز');
     }
   } catch (error) {
-    alert('حدث خطأ أثناء معالجة الحجز: ' + error.message);
+    alert('حدث خطأ: ' + error.message);
     console.error('Error:', error);
   } finally {
     submitBtn.innerHTML = originalText;
@@ -813,7 +756,7 @@ document.getElementById('reservationForm').addEventListener('submit', async e =>
   }
 });
 
-// معالجة دفع النتيجة
+// معالجة دفع النتيجة (من غير ملف)
 document.getElementById('paymentForm').addEventListener('submit', async e => {
   e.preventDefault();
   const formData = new FormData(e.target);
@@ -824,9 +767,15 @@ document.getElementById('paymentForm').addEventListener('submit', async e => {
   submitBtn.disabled = true;
 
   try {
+    const formObject = {};
+    formData.forEach((value, key) => {
+      formObject[key] = value;
+    });
+
     const res = await fetch('/pay', {
       method: 'POST',
-      body: formData
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formObject)
     });
 
     if (res.ok) {
@@ -837,7 +786,7 @@ document.getElementById('paymentForm').addEventListener('submit', async e => {
       throw new Error('فشل في إرسال البيانات');
     }
   } catch (error) {
-    alert('حدث خطأ أثناء إرسال البيانات: ' + error.message);
+    alert('حدث خطأ: ' + error.message);
     console.error('Error:', error);
   } finally {
     submitBtn.innerHTML = originalText;
@@ -845,20 +794,17 @@ document.getElementById('paymentForm').addEventListener('submit', async e => {
   }
 });
 
-// عرض النتيجة - الإصدار المحسن
 function displayResult(result) {
   if (!result || typeof result !== 'object') {
     alert('بيانات النتيجة غير صحيحة');
     return;
   }
 
-  console.log('النتيجة المستلمة:', result); // لأغراض التصحيح
+  console.log('النتيجة المستلمة:', result);
 
-  // بيانات الطالب
   const infoDiv = document.getElementById('studentInfo');
   infoDiv.innerHTML = '';
   
-  // إضافة الحقول الديناميكية
   const fieldsToShow = [
     { key: 'name', label: 'اسم الطالب' },
     { key: 'seatNumber', label: 'رقم الجلوس' },
@@ -876,43 +822,32 @@ function displayResult(result) {
     }
   });
 
-  // المواد الأساسية
   const mainTbody = document.querySelector('#mainSubjectsTable tbody');
   mainTbody.innerHTML = '';
   
   if (result.mainSubjects && Array.isArray(result.mainSubjects) && result.mainSubjects.length > 0) {
     result.mainSubjects.forEach(sub => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${sub.name || 'غير معروف'}</td>
-        <td>${sub.score || '0'}</td>
-        <td>${sub.outOf || '0'}</td>
-      `;
+      tr.innerHTML = `<td>${sub.name || 'غير معروف'}</td><td>${sub.score || '0'}</td><td>${sub.outOf || '0'}</td>`;
       mainTbody.appendChild(tr);
     });
   } else {
     mainTbody.innerHTML = '<tr><td colspan="3">لا توجد بيانات</td></tr>';
   }
 
-  // المواد الإضافية
   const addTbody = document.querySelector('#additionalSubjectsTable tbody');
   addTbody.innerHTML = '';
   
   if (result.additionalSubjects && Array.isArray(result.additionalSubjects) && result.additionalSubjects.length > 0) {
     result.additionalSubjects.forEach(sub => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${sub.name || 'غير معروف'}</td>
-        <td>${sub.score || '0'}</td>
-        <td>${sub.outOf || '0'}</td>
-      `;
+      tr.innerHTML = `<td>${sub.name || 'غير معروف'}</td><td>${sub.score || '0'}</td><td>${sub.outOf || '0'}</td>`;
       addTbody.appendChild(tr);
     });
   } else {
     addTbody.innerHTML = '<tr><td colspan="3">لا توجد بيانات</td></tr>';
   }
 
-  // الإجمالي والنسبة
   const totalScore = result.totalScore || 0;
   const totalOutOf = result.totalOutOf || 0;
   let percentage = result.percentage;
@@ -929,17 +864,14 @@ function displayResult(result) {
   currentResult = result;
 }
 
-// طباعة النتيجة
 function printResult() {
   if (!currentResult) {
     alert('لا توجد نتيجة للطباعة');
     return;
   }
 
-  // إنشاء نافذة طباعة جديدة
   const printWindow = window.open('', '_blank');
   
-  // محتوى HTML مخصص للطباعة
   printWindow.document.write(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -947,154 +879,31 @@ function printResult() {
       <meta charset="UTF-8">
       <title>نتيجة الطالب - ${currentResult.name || ''}</title>
       <style>
-        body {
-          font-family: 'Tajawal', sans-serif;
-          padding: 20px;
-          color: #000;
-          background: white;
-          line-height: 1.6;
-        }
-        .card {
-          background: white;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          padding: 15px;
-          margin-bottom: 15px;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 10px 0;
-        }
-        th, td {
-          border: 1px solid #ddd;
-          padding: 8px;
-          text-align: center;
-        }
-        th {
-          background-color: #f2f2f2;
-          font-weight: bold;
-        }
-        .result-header {
-          text-align: center;
-          margin-bottom: 20px;
-          padding-bottom: 15px;
-          border-bottom: 2px solid #3b82f6;
-        }
-        .summary-box {
-          background-color: #f9fafb;
-          padding: 15px;
-          border-radius: 8px;
-          margin: 15px 0;
-        }
-        .no-print {
-          display: none !important;
-        }
-        @media print {
-          body {
-            padding: 0;
-            margin: 0;
-          }
-          .card {
-            page-break-inside: avoid;
-          }
-          table {
-            page-break-inside: avoid;
-          }
-        }
+        body { font-family: 'Tajawal', sans-serif; padding: 20px; }
+        .card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .result-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; }
+        .no-print { display: none; }
+        @media print { body { padding: 0; } .card { page-break-inside: avoid; } }
       </style>
     </head>
     <body>
-      <div class="result-header">
-        <h2>نتيجة الطالب</h2>
-        <p>موقع الاستعلام عن نتائج الامتحانات - محافظة الجيزة</p>
-        <p>الصف الثاني الثانوي - العام الدراسي 2025/2026</p>
-      </div>
-      
-      <div class="card">
-        <h3>بيانات الطالب</h3>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-          <div><strong>اسم الطالب:</strong> ${currentResult.name || 'غير متوفر'}</div>
-          <div><strong>رقم الجلوس:</strong> ${currentResult.seatNumber || 'غير متوفر'}</div>
-          <div><strong>المرحلة:</strong> ${currentResult.stage || 'غير متوفر'}</div>
-          <div><strong>الصف:</strong> ${currentResult.gradeLevel || 'غير متوفر'}</div>
-          <div><strong>المدرسة:</strong> ${currentResult.schoolName || 'غير متوفر'}</div>
-          <div><strong>ملاحظات:</strong> ${currentResult.notes || 'لا توجد'}</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>المواد الأساسية</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>المادة</th>
-              <th>الدرجة</th>
-              <th>من</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${currentResult.mainSubjects ? currentResult.mainSubjects.map(sub => 
-              `<tr><td>${sub.name}</td><td>${sub.score}</td><td>${sub.outOf}</td></tr>`
-            ).join('') : '<tr><td colspan="3">لا توجد بيانات</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>المواد الإضافية</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>المادة</th>
-              <th>الدرجة</th>
-              <th>من</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${currentResult.additionalSubjects ? currentResult.additionalSubjects.map(sub => 
-              `<tr><td>${sub.name}</td><td>${sub.score}</td><td>${sub.outOf}</td></tr>`
-            ).join('') : '<tr><td colspan="3">لا توجد بيانات</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>الإجمالي والنسبة</h3>
-        <table>
-          <tr>
-            <th>المجموع الكلي</th>
-            <td>${currentResult.totalScore || '0'}</td>
-          </tr>
-          <tr>
-            <th>المجموع الكلي الممكن</th>
-            <td>${currentResult.totalOutOf || '0'}</td>
-          </tr>
-          <tr>
-            <th>النسبة المئوية</th>
-            <td>${currentResult.percentage || '0'}%</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div class="no-print" style="text-align: center; margin-top: 20px;">
-        <button onclick="window.print()" style="background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-          طباعة النتيجة
-        </button>
-      </div>
+      <div class="result-header"><h2>نتيجة الطالب</h2><p>موقع الاستعلام عن نتائج الامتحانات - محافظة الجيزة</p></div>
+      <div class="card"><h3>بيانات الطالب</h3><div><strong>الاسم:</strong> ${currentResult.name || 'غير متوفر'}</div><div><strong>رقم الجلوس:</strong> ${currentResult.seatNumber || 'غير متوفر'}</div><div><strong>المرحلة:</strong> ${currentResult.stage || 'غير متوفر'}</div><div><strong>الصف:</strong> ${currentResult.gradeLevel || 'غير متوفر'}</div><div><strong>المدرسة:</strong> ${currentResult.schoolName || 'غير متوفر'}</div></div>
+      <div class="card"><h3>المواد الأساسية</h3><table><thead><tr><th>المادة</th><th>الدرجة</th><th>من</th></tr></thead><tbody>${currentResult.mainSubjects ? currentResult.mainSubjects.map(sub => `<tr><td>${sub.name}</td><td>${sub.score}</td><td>${sub.outOf}</td></tr>`).join('') : '<tr><td colspan="3">لا توجد بيانات</td></tr>'}</tbody></table></div>
+      <div class="card"><h3>المواد الإضافية</h3><table><thead><tr><th>المادة</th><th>الدرجة</th><th>من</th></tr></thead><tbody>${currentResult.additionalSubjects ? currentResult.additionalSubjects.map(sub => `<tr><td>${sub.name}</td><td>${sub.score}</td><td>${sub.outOf}</td></tr>`).join('') : '<tr><td colspan="3">لا توجد بيانات</td></tr>'}</tbody></table></div>
+      <div class="card"><h3>الإجمالي والنسبة</h3><table><tr><th>المجموع الكلي</th><td>${currentResult.totalScore || '0'}</td></tr><tr><th>المجموع الكلي الممكن</th><td>${currentResult.totalOutOf || '0'}</td></tr><tr><th>النسبة المئوية</th><td>${currentResult.percentage || '0'}%</td></tr></table></div>
+      <div class="no-print" style="text-align:center; margin-top:20px;"><button onclick="window.print()">طباعة</button></div>
     </body>
     </html>
   `);
   
   printWindow.document.close();
-  
-  // الانتظار حتى يتم تحميل المحتوى ثم التركيز على النافذة للطباعة
-  setTimeout(() => {
-    printWindow.focus();
-  }, 500);
+  setTimeout(() => printWindow.focus(), 500);
 }
 
-// حفظ النتيجة كPDF
 async function saveAsPDF() {
   if (!currentResult) {
     alert('لا توجد نتيجة لحفظها');
@@ -1102,149 +911,43 @@ async function saveAsPDF() {
   }
 
   try {
-    // إنشاء عنصر مؤقت للطباعة
     const printableElement = document.createElement('div');
     printableElement.style.padding = '20px';
     printableElement.style.fontFamily = "'Tajawal', sans-serif";
     printableElement.style.direction = 'rtl';
     
     printableElement.innerHTML = `
-      <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #3b82f6;">
-        <h2>نتيجة الطالب</h2>
-        <p>موقع الاستعلام عن نتائج الامتحانات - محافظة الجيزة</p>
-        <p>الصف الثاني الثانوي - العام الدراسي 2023/2024</p>
-      </div>
-      
-      <div style="background: white; border-radius: 8px; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem;">بيانات الطالب</h3>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-          <div><strong>اسم الطالب:</strong> ${currentResult.name || 'غير متوفر'}</div>
-          <div><strong>رقم الجلوس:</strong> ${currentResult.seatNumber || 'غير متوفر'}</div>
-          <div><strong>المرحلة:</strong> ${currentResult.stage || 'غير متوفر'}</div>
-          <div><strong>الصف:</strong> ${currentResult.gradeLevel || 'غير متوفر'}</div>
-          <div><strong>المدرسة:</strong> ${currentResult.schoolName || 'غير متوفر'}</div>
-          <div><strong>ملاحظات:</strong> ${currentResult.notes || 'لا توجد'}</div>
-        </div>
-      </div>
-
-      <div style="background: white; border-radius: 8px; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem;">المواد الأساسية</h3>
-        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-          <thead>
-            <tr>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">المادة</th>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">الدرجة</th>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">من</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${currentResult.mainSubjects ? currentResult.mainSubjects.map(sub => 
-              `<tr>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${sub.name}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${sub.score}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${sub.outOf}</td>
-              </tr>`
-            ).join('') : '<tr><td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: center;">لا توجد بيانات</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-
-      <div style="background: white; border-radius: 8px; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem;">المواد الإضافية</h3>
-        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-          <thead>
-            <tr>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">المادة</th>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">الدرجة</th>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">من</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${currentResult.additionalSubjects ? currentResult.additionalSubjects.map(sub => 
-              `<tr>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${sub.name}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${sub.score}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${sub.outOf}</td>
-              </tr>`
-            ).join('') : '<tr><td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: center;">لا توجد بيانات</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-
-      <div style="background: white; border-radius: 8px; border: 1px solid #ddd; padding: 15px;">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem;">الإجمالي والنسبة</h3>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">المجموع الكلي</th>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: bold;">${currentResult.totalScore || '0'}</td>
-          </tr>
-          <tr>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">المجموع الكلي الممكن</th>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${currentResult.totalOutOf || '0'}</td>
-          </tr>
-          <tr>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: center; background-color: #f2f2f2; font-weight: bold;">النسبة المئوية</th>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: bold; color: green;">${currentResult.percentage || '0'}%</td>
-          </tr>
-        </table>
-      </div>
+      <div style="text-align:center; margin-bottom:20px; border-bottom:2px solid #3b82f6; padding-bottom:15px;"><h2>نتيجة الطالب</h2><p>موقع الاستعلام عن نتائج الامتحانات - محافظة الجيزة</p></div>
+      <div style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px;"><h3>بيانات الطالب</h3><div><strong>الاسم:</strong> ${currentResult.name || 'غير متوفر'}</div><div><strong>رقم الجلوس:</strong> ${currentResult.seatNumber || 'غير متوفر'}</div><div><strong>المرحلة:</strong> ${currentResult.stage || 'غير متوفر'}</div><div><strong>الصف:</strong> ${currentResult.gradeLevel || 'غير متوفر'}</div><div><strong>المدرسة:</strong> ${currentResult.schoolName || 'غير متوفر'}</div></div>
+      <div style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px;"><h3>المواد الأساسية</h3><table style="width:100%; border-collapse:collapse;"><thead><tr><th style="border:1px solid #ddd; padding:8px;">المادة</th><th style="border:1px solid #ddd; padding:8px;">الدرجة</th><th style="border:1px solid #ddd; padding:8px;">من</th></tr></thead><tbody>${currentResult.mainSubjects ? currentResult.mainSubjects.map(sub => `<tr><td style="border:1px solid #ddd; padding:8px;">${sub.name}</td><td style="border:1px solid #ddd; padding:8px;">${sub.score}</td><td style="border:1px solid #ddd; padding:8px;">${sub.outOf}</td></tr>`).join('') : '<tr><td colspan="3">لا توجد بيانات</td></tr>'}</tbody></table></div>
+      <div style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px;"><h3>المواد الإضافية</h3><table style="width:100%; border-collapse:collapse;"><thead><tr><th style="border:1px solid #ddd; padding:8px;">المادة</th><th style="border:1px solid #ddd; padding:8px;">الدرجة</th><th style="border:1px solid #ddd; padding:8px;">من</th></tr></thead><tbody>${currentResult.additionalSubjects ? currentResult.additionalSubjects.map(sub => `<tr><td style="border:1px solid #ddd; padding:8px;">${sub.name}</td><td style="border:1px solid #ddd; padding:8px;">${sub.score}</td><td style="border:1px solid #ddd; padding:8px;">${sub.outOf}</td></tr>`).join('') : '<tr><td colspan="3">لا توجد بيانات</td></tr>'}</tbody></table></div>
+      <div style="border:1px solid #ddd; padding:15px; border-radius:8px;"><h3>الإجمالي والنسبة</h3><table style="width:100%; border-collapse:collapse;"><tr><th style="border:1px solid #ddd; padding:8px;">المجموع الكلي</th><td style="border:1px solid #ddd; padding:8px;">${currentResult.totalScore || '0'}</td></tr><tr><th style="border:1px solid #ddd; padding:8px;">المجموع الكلي الممكن</th><td style="border:1px solid #ddd; padding:8px;">${currentResult.totalOutOf || '0'}</td></tr><tr><th style="border:1px solid #ddd; padding:8px;">النسبة المئوية</th><td style="border:1px solid #ddd; padding:8px;">${currentResult.percentage || '0'}%</td></tr></table></div>
     `;
     
-    // إضافة العنصر إلى الجسم مؤقتاً
     document.getElementById('pdf-container').appendChild(printableElement);
-    
-    // استخدام html2canvas لالتقاط لقطة للعنصر
-    const canvas = await html2canvas(printableElement, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff'
-    });
-    
-    // تحويل Canvas إلى صورة
+    const canvas = await html2canvas(printableElement, { scale: 2, backgroundColor: '#ffffff' });
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
-    
-    // إنشاء PDF باستخدام jsPDF
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
-    
-    // حساب أبعاد الصورة لتناسب PDF
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const imgX = (pdfWidth - imgWidth * ratio) / 2;
-    const imgY = 10;
-    
-    // إضافة الصورة إلى PDF
-    pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-    
-    // حفظ PDF
+    const ratio = pdfWidth / imgWidth;
+    pdf.addImage(imgData, 'JPEG', 0, 10, pdfWidth, imgHeight * ratio);
     pdf.save(`نتيجة_${currentResult.name || 'الطالب'}.pdf`);
-    
-    // إزالة العنصر المؤقت
     document.getElementById('pdf-container').removeChild(printableElement);
-    
   } catch (error) {
     console.error('Error generating PDF:', error);
     alert('حدث خطأ أثناء إنشاء PDF: ' + error.message);
   }
 }
 
-// ========== دوال الدردشة ==========
-// فتح/غلق الدردشة
 function toggleChatbot() {
   const bot = document.getElementById('chatbot');
   bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
-  
-  // إعادة تعيين الدردشة عند فتحها
-  if (bot.style.display === 'flex') {
-    resetChatbot();
-  }
+  if (bot.style.display === 'flex') resetChatbot();
 }
 
-// إعادة تعيين الدردشة
 function resetChatbot() {
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('chatOptions').style.display = 'none';
@@ -1255,7 +958,6 @@ function resetChatbot() {
   userData = { name: '', phone: '', email: '' };
 }
 
-// إضافة رسالة
 function addMessage(text, from = 'bot') {
   const container = document.getElementById('chatMessages');
   const msg = document.createElement('div');
@@ -1277,7 +979,6 @@ function addMessage(text, from = 'bot') {
   container.scrollTop = container.scrollHeight;
 }
 
-// معالجة إرسال بيانات المستخدم
 document.getElementById('submitUserData').addEventListener('click', function() {
   const name = document.getElementById('userName').value.trim();
   const phone = document.getElementById('userPhone').value.trim();
@@ -1288,17 +989,12 @@ document.getElementById('submitUserData').addEventListener('click', function() {
     return;
   }
   
-  // حفظ بيانات المستخدم
   userData = { name, phone, email };
-  
-  // إخفاء نموذج البيانات وإظهار خيارات الدردشة
   document.getElementById('userDataForm').style.display = 'none';
   document.getElementById('chatOptions').style.display = 'flex';
-  
   addMessage(`شكراً ${name}! كيف يمكنني مساعدتك؟`);
 });
 
-// التعامل مع الضغط على الاختيارات
 document.getElementById('chatOptions').addEventListener('click', async (e) => {
   const target = e.target;
   
@@ -1309,14 +1005,11 @@ document.getElementById('chatOptions').addEventListener('click', async (e) => {
       addMessage(target.textContent, 'user');
       addMessage('جاري تحويلك إلى واتساب...');
       window.open('https://wa.me/201274445091', '_blank');
-      
-      // إعادة تعيين الدردشة بعد ثانيتين
       setTimeout(resetChatbot, 2000);
     } else if (action === 'ask') {
       addMessage(target.textContent, 'user');
       addMessage('ممكن تكتب سؤالك هنا:');
       
-      // استبدال الخيارات بحقل إدخال السؤال
       document.getElementById('chatOptions').innerHTML = `
         <input type="text" id="userQuestion" placeholder="اكتب سؤالك..." style="padding:8px; border-radius:8px; border:1px solid #ddd; width:100%;">
         <button id="sendQuestion" style="margin-top:5px; padding:8px; border-radius:8px; border:none; background:#3b82f6; color:white; cursor:pointer;">إرسال</button>
@@ -1329,28 +1022,18 @@ document.getElementById('chatOptions').addEventListener('click', async (e) => {
           addMessage('جاري إرسال استفسارك للإدارة...');
           
           try {
-            // إرسال الاستفسار مع بيانات المستخدم إلى السيرفر
             const res = await fetch('/api/chat-inquiries', {
               method: 'POST',
               headers: {'Content-Type':'application/json'},
-              body: JSON.stringify({ 
-                message: question,
-                userData: userData
-              })
+              body: JSON.stringify({ message: question, userData: userData })
             });
             
             const data = await res.json();
-            if(data.success){
-              addMessage('تم إرسال استفسارك للإدارة بنجاح! سنتواصل معك قريباً.');
-            } else {
-              addMessage('حدث خطأ أثناء الإرسال.');
-            }
-          } catch(e){
-            console.error(e);
+            if(data.success) addMessage('تم إرسال استفسارك للإدارة بنجاح!');
+            else addMessage('حدث خطأ أثناء الإرسال.');
+          } catch(e) {
             addMessage('حدث خطأ أثناء الإرسال.');
           }
-          
-          // إعادة تعيين الدردشة بعد 3 ثوانٍ
           setTimeout(resetChatbot, 3000);
         }
       });
